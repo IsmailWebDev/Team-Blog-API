@@ -7,15 +7,25 @@ import { User } from '@interfaces/users.interface';
 
 @Service()
 export class UserService {
-  public user = new PrismaClient().user;
+  public user = new PrismaClient({
+    omit: {
+      user: {
+        password: true,
+      },
+    },
+  }).user;
 
   public async findAllUser(): Promise<User[]> {
-    const allUser: User[] = await this.user.findMany();
+    const allUser: User[] = await this.user.findMany({
+      where: {
+        deletedAt: null,
+      },
+    });
     return allUser;
   }
 
   public async findUserById(userId: number): Promise<User> {
-    const findUser: User = await this.user.findUnique({ where: { id: userId } });
+    const findUser: User = await this.user.findUnique({ where: { id: userId, deletedAt: null } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     return findUser;
@@ -33,7 +43,7 @@ export class UserService {
   public async updateUser(userId: number, userData: UpdateUserDto, profilePic?: string): Promise<User> {
     const findUser: User = await this.user.findUnique({ where: { id: userId } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
-    const updateData: Partial<User> = { ...userData };
+    const updateData: Partial<User> & { password: string } = { ...userData };
     if (userData.password) {
       const hashedPassword = await hash(userData.password, 10);
       updateData.password = hashedPassword;
@@ -43,10 +53,12 @@ export class UserService {
   }
 
   public async deleteUser(userId: number): Promise<User> {
-    const findUser: User = await this.user.findUnique({ where: { id: userId } });
-    if (!findUser) throw new HttpException(409, "User doesn't exist");
-
-    const deleteUserData = await this.user.delete({ where: { id: userId } });
-    return deleteUserData;
+    const softDeletedUser: User = await this.user.update({
+      where: { id: userId },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+    return softDeletedUser;
   }
 }

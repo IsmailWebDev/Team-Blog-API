@@ -6,7 +6,13 @@ import { CreatePostDto, UpdatePostDto } from '@/dtos/posts.dto';
 
 @Service()
 export class PostService {
-  public post = new PrismaClient().post;
+  public post = new PrismaClient({
+    omit: {
+      user: {
+        password: true,
+      },
+    },
+  }).post;
 
   public async findAllPost({ limit, cursor }: { limit: number; cursor?: number | null }): Promise<{ allPosts: Post[]; nextCursor: number }> {
     const totalPosts = await this.post.count();
@@ -18,11 +24,26 @@ export class PostService {
       },
       where: {
         deletedAt: null,
+        author: {
+          deletedAt: null,
+        },
       },
       cursor: cursor ? { id: cursor } : undefined,
-      include: {
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        excerpt: true,
+        authorId: true,
+        thumbnail: true,
+        createdAt: true,
+        updatedAt: true,
         author: true,
-        comments: true,
+        comments: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
     let nextCursor: typeof cursor | undefined = undefined;
@@ -39,11 +60,29 @@ export class PostService {
 
   public async findPostById(postId: number): Promise<Post> {
     const findPost: Post = await this.post.findUnique({
-      include: {
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        excerpt: true,
+        authorId: true,
+        thumbnail: true,
+        createdAt: true,
+        updatedAt: true,
         author: true,
-        comments: true,
+        comments: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
-      where: { id: postId },
+      where: {
+        id: postId,
+        deletedAt: null,
+        author: {
+          deletedAt: null,
+        },
+      },
     });
     if (!findPost) throw new HttpException(404, "Post doesn't exist");
 
@@ -59,9 +98,21 @@ export class PostService {
         thumbnail,
         authorId: authorId,
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        excerpt: true,
+        authorId: true,
+        thumbnail: true,
+        createdAt: true,
+        updatedAt: true,
         author: true,
-        comments: true,
+        comments: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
     return createdPost;
@@ -74,9 +125,21 @@ export class PostService {
         ...postData,
         thumbnail: thumbnail,
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        excerpt: true,
+        authorId: true,
+        thumbnail: true,
+        createdAt: true,
+        updatedAt: true,
         author: true,
-        comments: true,
+        comments: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
     return updatedPost;
@@ -88,9 +151,21 @@ export class PostService {
       data: {
         deletedAt: new Date(),
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        excerpt: true,
+        authorId: true,
+        thumbnail: true,
+        createdAt: true,
+        updatedAt: true,
         author: true,
-        comments: true,
+        comments: {
+          where: {
+            deletedAt: null,
+          },
+        },
       },
     });
     return softDeletedPost;

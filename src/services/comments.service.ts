@@ -9,7 +9,11 @@ export class CommentService {
   public comment = new PrismaClient().comment;
 
   public async findAllComment(): Promise<Comment[]> {
-    const allComments: Comment[] = await this.comment.findMany();
+    const allComments: Comment[] = await this.comment.findMany({
+      where: {
+        deletedAt: null,
+      },
+    });
     return allComments;
   }
 

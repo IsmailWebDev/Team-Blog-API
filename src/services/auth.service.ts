@@ -6,7 +6,7 @@ import { SECRET_KEY } from '@config';
 import { CreateUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
+import { User, UserWithPassword } from '@interfaces/users.interface';
 
 @Service()
 export class AuthService {
@@ -17,13 +17,18 @@ export class AuthService {
     if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
 
     const hashedPassword = await hash(userData.password, 10);
-    const createUserData: Promise<User> = this.users.create({ data: { ...userData, password: hashedPassword } });
+    const createUserData = this.users.create({
+      data: { ...userData, password: hashedPassword },
+      omit: {
+        password: true,
+      },
+    });
 
     return createUserData;
   }
 
-  public async login(userData: CreateUserDto): Promise<{ cookie: string; findUser: User }> {
-    const findUser: User = await this.users.findUnique({ where: { email: userData.email } });
+  public async login(userData: CreateUserDto): Promise<{ cookie: string; findUser: UserWithPassword }> {
+    const findUser: UserWithPassword = await this.users.findUnique({ where: { email: userData.email, deletedAt: null } });
     if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
 
     const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
@@ -36,7 +41,7 @@ export class AuthService {
   }
 
   public async logout(userData: User): Promise<User> {
-    const findUser: User = await this.users.findFirst({ where: { email: userData.email, password: userData.password } });
+    const findUser: User = await this.users.findFirst({ where: { email: userData.email } });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     return findUser;

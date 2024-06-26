@@ -156,28 +156,34 @@ paths:
       summary: Update User By Id
       security:
         - cookieAuth: []
+      consumes:
+        - multipart/form-data
       parameters:
         - name: id
           in: path
           description: User Id
           required: true
           type: integer
-        - name: body
-          in: body
-          description: User Data
-          required: true
-          schema:
-            type: object
-            properties:
-              password:
-                type: string
-              username:
-                type: string
-              bio:
-                type: string
-              profilePic:
-                type: string
-                format: uri
+        - name: password
+          in: formData
+          description: User Password
+          required: false
+          type: string
+        - name: username
+          in: formData
+          description: User Username
+          required: false
+          type: string
+        - name: bio
+          in: formData
+          description: User Bio
+          required: false
+          type: string
+        - name: profilePic
+          in: formData
+          description: User Profile Picture
+          required: false
+          type: file
       responses:
         200:
           description: 'OK'
@@ -238,23 +244,29 @@ paths:
       summary: Create Post
       security:
         - cookieAuth: []
+      consumes:
+        - multipart/form-data
       parameters:
-        - name: body
-          in: body
-          description: Post Data
+        - name: title
+          in: formData
+          description: Post Title
           required: true
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-              content:
-                type: string
-              excerpt:
-                type: string
-              thumbnail:
-                type: string
-                format: uri
+          type: string
+        - name: content
+          in: formData
+          description: Post Content
+          required: true
+          type: string
+        - name: excerpt
+          in: formData
+          description: Post Excerpt
+          required: false
+          type: string
+        - name: thumbnail
+          in: formData
+          description: Post Thumbnail Image
+          required: false
+          type: file
       responses:
         201:
           description: 'Created'
@@ -291,28 +303,34 @@ paths:
       summary: Update Post By Id
       security:
         - cookieAuth: []
+      consumes:
+        - multipart/form-data
       parameters:
         - name: id
           in: path
           description: Post Id
           required: true
           type: integer
-        - name: body
-          in: body
-          description: Post Data
-          required: true
-          schema:
-            type: object
-            properties:
-              title:
-                type: string
-              content:
-                type: string
-              excerpt:
-                type: string
-              thumbnail:
-                type: string
-                format: uri
+        - name: title
+          in: formData
+          description: Post Title
+          required: false
+          type: string
+        - name: content
+          in: formData
+          description: Post Content
+          required: false
+          type: string
+        - name: excerpt
+          in: formData
+          description: Post Excerpt
+          required: false
+          type: string
+        - name: thumbnail
+          in: formData
+          description: Post Thumbnail Image
+          required: false
+          type: file
       responses:
         200:
           description: 'OK'

@@ -8,6 +8,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
 }
 
 model User {
@@ -20,6 +21,8 @@ model User {
   posts            Post[]
   comments         Comment[]
   isAdmin          Boolean  @default(false)
+  deletedAt        DateTime?
+
 }
 
 model Post {

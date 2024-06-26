@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
 import { RequestWithUser } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
+import { User, UserWithPassword } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
 
 export class AuthController {
@@ -9,7 +9,7 @@ export class AuthController {
 
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: User = req.body;
+      const userData: UserWithPassword = req.body;
       const signUpUserData: User = await this.auth.signup(userData);
 
       res.status(201).json({ data: signUpUserData, message: 'signup' });
@@ -20,11 +20,11 @@ export class AuthController {
 
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: User = req.body;
+      const userData: UserWithPassword = req.body;
       const { cookie, findUser } = await this.auth.login(userData);
-
+      const { password, ...user } = findUser;
       res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json({ data: findUser, message: 'login' });
+      res.status(200).json({ data: user, message: 'login' });
     } catch (error) {
       next(error);
     }
