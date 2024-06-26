@@ -9,14 +9,11 @@
     "dev": "cross-env NODE_ENV=development nodemon",
     "build": "swc src -d dist --source-maps --copy-files",
     "build:tsc": "tsc && tsc-alias",
-    "test": "jest --forceExit --detectOpenHandles",
     "lint": "eslint --ignore-path .gitignore --ext .ts src/",
     "lint:fix": "npm run lint -- --fix",
     "prisma:init": "prisma init",
     "prisma:migrate": "dotenv -e .env.development.local -- prisma migrate dev --preview-feature",
-    "prisma:generate": "dotenv -e .env.development.local -- prisma generate",
-    "deploy:prod": "npm run build && pm2 start ecosystem.config.js --only prod",
-    "deploy:dev": "pm2 start ecosystem.config.js --only dev"
+    "prisma:generate": "dotenv -e .env.development.local -- prisma generate"
   },
   "prisma": {
     "schema": "src/prisma/schema.prisma"

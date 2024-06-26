@@ -16,6 +16,17 @@ export class PostService {
 
   public async findAllPost({ limit, cursor }: { limit: number; cursor?: number | null }): Promise<{ allPosts: Post[]; nextCursor: number }> {
     const totalPosts = await this.post.count();
+    const latestPostId = await this.post.findFirst({
+      orderBy: {
+        createdAt: 'asc',
+      },
+      where: {
+        deletedAt: null,
+        author: {
+          deletedAt: null,
+        },
+      },
+    });
     const allPosts: Post[] = await this.post.findMany({
       take: limit || undefined,
       skip: cursor ? 1 : undefined,
@@ -51,10 +62,9 @@ export class PostService {
       const lastPostInResult = allPosts.at(-1);
       nextCursor = lastPostInResult?.id;
     }
-    if (nextCursor >= totalPosts) {
+    if (nextCursor >= totalPosts || nextCursor === latestPostId?.id) {
       nextCursor = undefined;
     }
-
     return { allPosts, nextCursor };
   }
 
