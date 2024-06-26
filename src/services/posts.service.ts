@@ -7,20 +7,18 @@ import { CreatePostDto, UpdatePostDto } from '@/dtos/posts.dto';
 @Service()
 export class PostService {
   public post = new PrismaClient().post;
-  public deletedPost = new PrismaClient().deletedPost;
 
-  public async findAllPost({
-    limit,
-    cursor,
-  }: {
-    limit: number;
-    cursor?: number | null;
-  }): Promise<{ allPosts: Post[]; nextCursor: number; deletedPosts: number }> {
+  public async findAllPost({ limit, cursor }: { limit: number; cursor?: number | null }): Promise<{ allPosts: Post[]; nextCursor: number }> {
     const totalPosts = await this.post.count();
-    let deletedPosts: number;
     const allPosts: Post[] = await this.post.findMany({
       take: limit || undefined,
       skip: cursor ? 1 : undefined,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      where: {
+        deletedAt: null,
+      },
       cursor: cursor ? { id: cursor } : undefined,
       include: {
         author: true,
@@ -30,20 +28,13 @@ export class PostService {
     let nextCursor: typeof cursor | undefined = undefined;
     if (allPosts.length >= (limit || undefined)) {
       const lastPostInResult = allPosts.at(-1);
-      deletedPosts = await this.deletedPost.count({
-        where: {
-          postId: {
-            lt: lastPostInResult.id,
-          },
-        },
-      });
       nextCursor = lastPostInResult?.id;
     }
     if (nextCursor >= totalPosts) {
       nextCursor = undefined;
     }
 
-    return { allPosts, nextCursor, deletedPosts };
+    return { allPosts, nextCursor };
   }
 
   public async findPostById(postId: number): Promise<Post> {
@@ -92,18 +83,16 @@ export class PostService {
   }
 
   public async deletePost(postId: number): Promise<Post> {
-    const deletedPost: Post = await this.post.delete({
+    const softDeletedPost: Post = await this.post.update({
       where: { id: postId },
+      data: {
+        deletedAt: new Date(),
+      },
       include: {
         author: true,
         comments: true,
       },
     });
-    await this.deletedPost.create({
-      data: {
-        postId: postId,
-      },
-    });
-    return deletedPost;
+    return softDeletedPost;
   }
 }

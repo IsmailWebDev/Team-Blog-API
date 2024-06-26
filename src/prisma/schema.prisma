@@ -33,6 +33,7 @@ model Post {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
   comments         Comment[]
+  deletedAt        DateTime?
 }
 
 model Comment {
@@ -42,10 +43,8 @@ model Comment {
   postId           Int
   commenter        User     @relation(fields: [commenterId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   commenterId      Int
+  deletedAt        DateTime?
+
 }
 
-model DeletedPost {
-  id        Int      @id @default(autoincrement())
-  postId    Int
-  deletedAt DateTime @default(now())
-}
+

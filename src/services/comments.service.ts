@@ -13,15 +13,20 @@ export class CommentService {
     return allComments;
   }
 
-  public async findCommentById(commentId: number): Promise<Comment> {
-    const findComment: Comment = await this.comment.findUnique({ where: { id: commentId } });
+  public async findCommentById(commentId: number): Promise<Comment[]> {
+    const findComment: Comment[] = await this.comment.findMany({
+      where: { postId: commentId, deletedAt: null },
+      orderBy: {
+        id: 'asc',
+      },
+    });
     if (!findComment) throw new HttpException(404, "Comment doesn't exist");
 
     return findComment;
   }
 
   public async createComment(commentData: CreateCommentDto, commenterId: number): Promise<Comment> {
-    const createdComment: Comment = await this.comment.create({ data: {...commentData, commenterId}});
+    const createdComment: Comment = await this.comment.create({ data: { ...commentData, commenterId } });
     return createdComment;
   }
 
@@ -31,7 +36,12 @@ export class CommentService {
   }
 
   public async deleteComment(commentId: number): Promise<Comment> {
-    const deletedComment: Comment = await this.comment.delete({ where: { id: commentId } });
-    return deletedComment;
+    const softDeletedComment: Comment = await this.comment.update({
+      where: { id: commentId },
+      data: {
+        deletedAt: new Date(),
+      },
+    });
+    return softDeletedComment;
   }
 }
