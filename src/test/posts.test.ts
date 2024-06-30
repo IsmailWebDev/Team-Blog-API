@@ -110,8 +110,8 @@ describe('PostService', () => {
       const deletedPost = await postService.deletePost(createdPost.id);
 
       expect(deletedPost.id).toBe(createdPost.id);
-      expect((deletedPost as any).deletedAt).toBeDefined();
-      expect((deletedPost as any).deletedAt).toBeInstanceOf(Date);
+      expect(deletedPost.deletedAt).toBeDefined();
+      expect(deletedPost.deletedAt).toBeInstanceOf(Date);
 
       const { allPosts } = await postService.findAllPost({ limit: 10, cursor: null });
       expect(allPosts.find(post => post.id === createdPost.id)).toBeUndefined();

@@ -110,8 +110,8 @@ describe('CommentService', () => {
       const deletedComment = await commentService.deleteComment(createdComment.id);
 
       expect(deletedComment.id).toBe(createdComment.id);
-      expect((deletedComment as any).deletedAt).toBeDefined();
-      expect((deletedComment as any).deletedAt).toBeInstanceOf(Date);
+      expect(deletedComment.deletedAt).toBeDefined();
+      expect(deletedComment.deletedAt).toBeInstanceOf(Date);
 
       const allComments = await commentService.findAllComment();
       expect(allComments.find(comment => comment.id === createdComment.id)).toBeUndefined();

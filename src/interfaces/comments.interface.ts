@@ -3,4 +3,5 @@ export interface Comment {
   content: string;
   postId: number;
   commenterId: number;
+  deletedAt?: Date;
 }

@@ -120,7 +120,7 @@ describe('AuthService', () => {
       expect(logoutUser.id).toBeDefined();
       expect(logoutUser.username).toBeDefined();
       expect(logoutUser.isAdmin).toBeDefined();
-      expect((logoutUser as any).password).toBeUndefined();
+      expect(logoutUser.password).toBeUndefined();
     });
 
     it('should throw an error if user does not exist', async () => {
