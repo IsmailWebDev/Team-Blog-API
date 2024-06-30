@@ -1,15 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
 import { RequestWithUser } from '@interfaces/auth.interface';
-import { User, UserWithPassword } from '@interfaces/users.interface';
+import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
+import { loginDto, signupDto } from '@/dtos/auth.dto';
 
 export class AuthController {
   public auth = Container.get(AuthService);
 
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserWithPassword = req.body;
+      const userData: signupDto = req.body;
       const signUpUserData: User = await this.auth.signup(userData);
 
       res.status(201).json({ data: signUpUserData, message: 'signup' });
@@ -20,7 +21,7 @@ export class AuthController {
 
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: UserWithPassword = req.body;
+      const userData: loginDto = req.body;
       const { cookie, findUser } = await this.auth.login(userData);
       const { password, ...user } = findUser;
       res.setHeader('Set-Cookie', [cookie]);

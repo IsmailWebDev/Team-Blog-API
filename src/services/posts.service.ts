@@ -129,6 +129,9 @@ export class PostService {
   }
 
   public async updatePost(postId: number, postData: UpdatePostDto, thumbnail?: string): Promise<Post> {
+    const findPost = await this.post.findUnique({ where: { id: postId } });
+    if (!findPost) throw new HttpException(409, "Post doesn't exist");
+
     const updatedPost: Post = await this.post.update({
       where: { id: postId },
       data: {
@@ -156,6 +159,9 @@ export class PostService {
   }
 
   public async deletePost(postId: number): Promise<Post> {
+    const findPost = await this.post.findUnique({ where: { id: postId } });
+    if (!findPost) throw new HttpException(409, "Post doesn't exist");
+
     const softDeletedPost: Post = await this.post.update({
       where: { id: postId },
       data: {
@@ -163,6 +169,7 @@ export class PostService {
       },
       select: {
         id: true,
+        deletedAt: true,
         title: true,
         content: true,
         excerpt: true,

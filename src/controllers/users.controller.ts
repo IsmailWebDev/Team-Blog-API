@@ -29,7 +29,7 @@ export class UserController {
 
   public createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const userData: User = req.body;
+      const userData: User & { password: string } = req.body;
       const createUserData: User = await this.user.createUser(userData);
 
       res.status(201).json({ data: createUserData, message: 'created' });
@@ -41,7 +41,7 @@ export class UserController {
   public updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userId = Number(req.params.id);
-      const userData: User = req.body;
+      const userData: User & { password: string } = req.body;
       const profilePic = req.file?.filename;
       const updateUserData: User = await this.user.updateUser(userId, userData, profilePic);
 

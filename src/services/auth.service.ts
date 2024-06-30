@@ -3,16 +3,16 @@ import { compare, hash } from 'bcrypt';
 import { sign } from 'jsonwebtoken';
 import { Service } from 'typedi';
 import { SECRET_KEY } from '@config';
-import { CreateUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, TokenData } from '@interfaces/auth.interface';
-import { User, UserWithPassword } from '@interfaces/users.interface';
+import { User } from '@interfaces/users.interface';
+import { loginDto, signupDto } from '@/dtos/auth.dto';
 
 @Service()
 export class AuthService {
   public users = new PrismaClient().user;
 
-  public async signup(userData: CreateUserDto): Promise<User> {
+  public async signup(userData: signupDto): Promise<User> {
     const findUser: User = await this.users.findUnique({ where: { email: userData.email } });
     if (findUser) throw new HttpException(409, `This email ${userData.email} already exists`);
 
@@ -27,8 +27,8 @@ export class AuthService {
     return createUserData;
   }
 
-  public async login(userData: CreateUserDto): Promise<{ cookie: string; findUser: UserWithPassword }> {
-    const findUser: UserWithPassword = await this.users.findUnique({ where: { email: userData.email, deletedAt: null } });
+  public async login(userData: loginDto): Promise<{ cookie: string; findUser: User }> {
+    const findUser: User = await this.users.findUnique({ where: { email: userData.email, deletedAt: null } });
     if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
 
     const isPasswordMatching: boolean = await compare(userData.password, findUser.password);
@@ -41,7 +41,12 @@ export class AuthService {
   }
 
   public async logout(userData: User): Promise<User> {
-    const findUser: User = await this.users.findFirst({ where: { email: userData.email } });
+    const findUser: User = await this.users.findFirst({
+      where: { email: userData.email },
+      omit: {
+        password: true,
+      },
+    });
     if (!findUser) throw new HttpException(409, "User doesn't exist");
 
     return findUser;

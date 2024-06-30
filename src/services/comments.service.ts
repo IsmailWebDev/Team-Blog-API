@@ -35,11 +35,17 @@ export class CommentService {
   }
 
   public async updateComment(commentId: number, commentData: UpdateCommentDto): Promise<Comment> {
+    const findComment = await this.comment.findUnique({ where: { id: commentId } });
+    if (!findComment) throw new HttpException(409, "Comment doesn't exist");
+
     const updatedComment: Comment = await this.comment.update({ where: { id: commentId }, data: commentData });
     return updatedComment;
   }
 
   public async deleteComment(commentId: number): Promise<Comment> {
+    const findComment = await this.comment.findUnique({ where: { id: commentId } });
+    if (!findComment) throw new HttpException(409, "Comment doesn't exist");
+
     const softDeletedComment: Comment = await this.comment.update({
       where: { id: commentId },
       data: {

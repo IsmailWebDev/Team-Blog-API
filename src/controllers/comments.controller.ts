@@ -20,7 +20,7 @@ export class CommentController {
   public getCommentById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const commentId = Number(req.params.id);
-      const findOneCommentData: Comment = await this.comment.findCommentById(commentId);
+      const findOneCommentData: Comment[] = await this.comment.findCommentById(commentId);
 
       res.status(200).json({ data: findOneCommentData, message: 'findOne' });
     } catch (error) {
