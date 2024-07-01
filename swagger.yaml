@@ -81,6 +81,32 @@ paths:
         500:
           description: 'Server Error'
 
+  /logout:
+    post:
+      tags:
+        - auth
+      summary: User Logout
+      security:
+        - cookieAuth: []
+      responses:
+        200:
+          description: 'OK'
+          schema:
+            type: object
+            properties:
+              data:
+                $ref: '#/definitions/User'
+              message:
+                type: string
+                example: 'logout'
+          headers:
+            Set-Cookie:
+              type: string
+              description: |
+                Clears the Authorization cookie.
+                - Max-age: 0
+        500:
+          description: 'Server Error'
   /users:
     get:
       tags:
